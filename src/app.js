@@ -5,10 +5,11 @@ const mongoose=require("mongoose");
 const User=require("./models/user");
 const { ReturnDocument } = require("mongodb");
 const{validateSignUpData}=require("./utils/validation")
-// const cookieParser=require("cookie-parser")
+const cookieParser=require("cookie-parser")
+const jwt=require('jsonwebtoken')
 
 app.use(express.json())
-// app.use(cookieParser())
+app.use(cookieParser())
 
 const bcrypt=require("bcrypt")
 
@@ -50,8 +51,12 @@ app.post("/login",async(req,res)=>{
         const isPasswordvalid =await bcrypt.compare(password,user.password)
 
         if(isPasswordvalid){
-            // res.cookie("token","abcdefhidoajfakddddddddmadmowierjkjdsnf")
-            // res.send("login succusfully")
+            //Create JWT Token
+            const token=await jwt.sign({_id:user._id},"amala1234");
+            console.log(token)
+            res.cookie("token",token)
+            res.send("login succussfully")
+
         }else{
             throw new Error("Invalid password")
         }
@@ -60,12 +65,34 @@ app.post("/login",async(req,res)=>{
     }
 })
 
-// app.get("/profile",async(req,res)=>{
-//     const cookie=req.cookies;
+app.get("/profile",async(req,res)=>{
+    try{
+        const cookie=req.cookies;
 
-//     console.log(cookie);
-//     res.send("Reading cookies")
-// })
+        const {token}=cookie;
+       if(!token){
+        throw new Error("Invalid Token")
+       }
+       const decodedMessage=await jwt.verify(token,"amala1234");
+       console.log(decodedMessage)
+
+       const {_id}=decodedMessage
+       console.log("Logged in user is:"+_id)
+
+      //using user id to get all details
+       const user=await User.findById(_id);
+       if(!user){
+        throw new Error("user does not exist")
+       }
+        res.send(user)
+
+    }catch(err){
+        res.status(400).send("Error:"+err.message)
+    }
+    
+})
+
+
    
 
 //Get user by email
