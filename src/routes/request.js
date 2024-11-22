@@ -1,7 +1,7 @@
 const express=require("express");
 const requestRouter=express.Router();
 const User = require("../models/user");
-const {userAuth}=require("../middleware/auth");
+const { userAuth } = require('../middleware/auth');
 const ConnectionRequest=require("../models/connectionRequest")
 
 requestRouter.post("/request/send/:status/:toUserId",userAuth,async(req,res)=>{
@@ -39,7 +39,7 @@ requestRouter.post("/request/send/:status/:toUserId",userAuth,async(req,res)=>{
              status,
         })
         const data=await connectionRequest.save();
-        res.json({message:"connection Request sent succussfully",
+        res.json({message: "connection Request sent succussfully" ,
         data,
         })
    }catch(err){
